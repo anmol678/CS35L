@@ -1,0 +1,124 @@
+In this lab we were required to write two programs tr2b and tr2u that implement the functionality of tr command taking in two string array arguments from and to. from and to are required to have the 
+same length and the programs should transliterate every byte in from to the corresponding byte in to.
+
+1. tr2b uses getchar() and putchar() to read data one byte at time
+2. tr2u employs read() and write() in the unistd header file to read byte by byte
+Both these programs have exactly the same logic:
+  i) First we check if the number of arguments meets our requirements
+ ii) Then we check our argument from and to, for equal lengths
+iii) Then we check the from argument for any duplicate bytes (or characters)
+ iv) Next we begin reading data from the source, using getchar() in (1) and read() in (2)
+  v) We setup a loop that executes till we read EOF
+ vi) For each byte that we read from our source (stdin), we compare it to each byte in the from argument. If there is a match, we transliterate as required otherwise we output the same character that 
+was read. This is done using putchar in (1) and write in (2)
+vii) after the above mentioned process is complete we read another byte from the source using getchar() or read() and repeat the step (vi).
+
+3. In order to use strace first we need to create a file that is at least 5MB as specified. We run the following command:
+dd if=/dev/urandom of=file.txt bs=5000 count=1000
+a) Executing strace when copying one file to another
+The following command gives us a count for system calls issued for tr2b:
+strace -c ./tr2b abc qwe < file.txt > out.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.24    0.000293           4        77           write
+ 17.85    0.000093           1        79           read
+  9.02    0.000047           5         9           mmap
+  4.61    0.000024           6         4           mprotect
+  3.07    0.000016           4         4           fstat
+  2.30    0.000012           6         2           open
+  1.73    0.000009           9         1           munmap
+  1.34    0.000007           7         1           execve
+  1.15    0.000006           3         2           close
+  1.15    0.000006           6         1         1 access
+  0.77    0.000004           4         1           brk
+  0.77    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000521                   182         1 total
+
+The following command gives us a count for system calls issued for tr2u:
+strace -c ./tr2u abc qwe < file.txt > out.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.68    5.878054           1   5000000           write
+ 44.32    4.678072           1   5000002           read
+  0.00    0.000038           5         7           mmap
+  0.00    0.000024           6         4           mprotect
+  0.00    0.000013           7         2           open
+  0.00    0.000010          10         1           munmap
+  0.00    0.000007           4         2           fstat
+  0.00    0.000007           7         1         1 access
+  0.00    0.000006           3         2           close
+  0.00    0.000006           6         1           execve
+  0.00    0.000004           4         1           brk
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   10.556244              10000024         1 total
+
+Hence we see that there were 182 system calls for tr2b as compared to 10000024 for tr2u.
+b) Executing strace when copying a file to terminal
+The following command gives us a count for system calls issued for tr2b:
+strace -c ./tr2b abc qwe < file.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 98.49    0.024186           1     19987           write
+  0.97    0.000237           3        79           read
+  0.18    0.000045           5         9           mmap
+  0.10    0.000025           6         4           mprotect
+  0.07    0.000016           4         4           fstat
+  0.05    0.000013           7         2           open
+  0.04    0.000009           9         1           munmap
+  0.02    0.000006           3         2           close
+  0.02    0.000006           6         1         1 access
+  0.02    0.000006           6         1           execve
+  0.02    0.000004           4         1           brk
+  0.01    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.024556                 20092         1 total
+
+The following command gives us a count for system calls issued for tr2u:
+strace -c ./tr2u abc qwe < file.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.93    5.910705           1   5000000           write
+ 44.07    4.657547           1   5000002           read
+  0.00    0.000036           5         7           mmap
+  0.00    0.000024           6         4           mprotect
+  0.00    0.000013           7         2           open
+  0.00    0.000010          10         1           munmap
+  0.00    0.000008           4         2           fstat
+  0.00    0.000007           7         1         1 access
+  0.00    0.000007           7         1           execve
+  0.00    0.000006           3         2           close
+  0.00    0.000004           4         1           brk
+  0.00    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   10.568371              10000024         1 total
+
+Here too we see tr2b making lesser system calls than tr2u. However, as compared to copying to another file the number of system calls issued by tr2b has increased significantly. Surprisingly, the 
+number of system calls issued by tr2u remains exactly the same in both cases.
+
+4. Lastly, we compare how faster one program is than the other using time command
+a) when copying from one file to another:
+time ./tr2b abc qwe < file.txt > out.txt
+real	0m0.241s
+user	0m0.189s
+sys	0m0.009s
+
+time ./tr2u abc qwe < file.txt > out.txt
+real	0m6.486s
+user	0m0.337s
+sys	0m6.103s
+
+b) when copying a file to terminal
+time ./tr2b abc qwe < file.txt
+real	0m1.136s
+user	0m0.217s
+sys	0m0.077s
+
+time ./tr2u abc qwe < file.txt
+real	0m8.864s
+user	0m0.387s
+sys	0m8.445s
+
+These results clearly show that tr2b is the winner! It is significantly faster when compared to tr2u as it performs a lesser number of system calls. Since, getchar and putchar make use of buffers 
+(unlike read and write), tr2b is faster than tr2u.

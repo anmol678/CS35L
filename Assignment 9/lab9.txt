@@ -1,0 +1,138 @@
+1. We begin y cloning the Diffutils repository using the following command:
+git clone ~eggert/src/gnu/diffutils
+
+2. First we cd into the diffutils directory, then we execute git log > git-log.txt to save the log of the repository in a text file.
+
+3. Similarly, we execute git tag > git-tags.txt to save the list of tags in a text file.
+
+4. We open the git-log.txt in emacs and then search for string “maint: quote 'like this' or "like this", not `like this’” using C-s (in emacs). Once we find the corresponding commit, we make a note of the commit ID which is 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f. We obtain a patch file by executing git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt.
+
+5. git checkout v3.0 allows us to checkout version 3.0 of Diffutils.
+
+6. We apply the patch in file quote-patch.txt to version 3.0 of Diffutils using: patch -p1 < quote-patch.txt. We skip past when it asks us to specify the file to which the patch needs to be applied and finally get an output that indicates '1 out of 9 hunks FAILED' amongst other things.
+
+7. git status gives us an overview of all the files that were modified and some new that were created while applying the patch from quote-patch.txt. We get the following output:
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   NEWS
+	modified:   README
+	modified:   TODO
+	modified:   doc/diagmeet.note
+	modified:   ms/config.bat
+	modified:   ms/config.site
+	modified:   po/en.po
+	modified:   src/analyze.c
+	modified:   src/cmp.c
+	modified:   src/context.c
+	modified:   src/diff.c
+	modified:   src/diff.h
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/ifdef.c
+	modified:   src/io.c
+	modified:   src/sdiff.c
+	modified:   src/side.c
+	modified:   src/system.h
+	modified:   src/util.c
+	modified:   tests/help-version
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	NEWS.orig
+	README-hacking.orig
+	README-hacking.rej
+	README.orig
+	README.rej
+	cfg.mk.orig
+	cfg.mk.rej
+	git-log.txt
+	git-tags.txt
+	ms/config.site.orig
+	quote-patch.txt
+	src/cmp.c.orig
+	src/context.c.orig
+	src/diff.c.orig
+	src/diff.c.rej
+	src/diff.h.orig
+	src/diff3.c.orig
+	src/diff3.c.rej
+	src/dir.c.orig
+	src/sdiff.c.orig
+	src/system.h.orig
+	src/util.c.orig
+	tests/help-version.orig
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+8. We learn how to use Emacs functions such as vc-diff and vc-revert to revert files in Emacs.
+
+9. First we begin reverting the non .c files. We open each of these files in Emacs and use C-x v u to revert any changes made while applying the patch. Next, we begin to revert the relevant changes to .c files. We first find the difference using vc-diff (C-x v =), go to the relevant line and make the change required leaving changes to character string constants only. The changes discarded are listed below:
+src/analyze.c: all changes reverted
+src/cmp.c: L36, L364, L377
+src/context.c: all changes reverted
+src/diff.c: L40, L57-59, L92, L98
+src/diff3.c: L35, L159, L1475
+src/dir.c: L84, L125, L234
+src/ifdef.c: all changes reverted
+src/io.c: all changes reverted
+src/sdiff.c: L35, L92, L747
+src/side.c: all changes reverted
+src/util.c: L27, L121, L146, L190, L241, L270, L650
+
+10. We examine src/*.c.rej files to check for rejected changes and apply them manually. Changes made:
+diff.c: L876, L906, L942
+diff3.c: L433
+changed ` to ' in all cases above.
+
+11. To remove all untracked files we simply execute git clean -f.
+
+12. Once we are done with this git status outputs:
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   src/cmp.c
+	modified:   src/diff.c
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/sdiff.c
+	modified:   src/util.c
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+We then save the output of git diff using git diff > quote-3.0-patch.txt.
+
+13. We build diffutils on lnxsrv08 since it uses version 2.12 of the GNU C Library. Executing the following commands:
+./bootstrap
+./configure
+make
+make check
+We then check that Diffutils works fine by executing diff . - and diff —help.
+
+14. To do sanity check we follow the following steps:
+Create two new directories:
+mkdir diffutils-3.0
+mkdir diffutils-3.0-patch
+
+Fetch original source code into diffutils-3.0:
+git clone ~eggert/src/gnu/diffutils diffutils-3.0
+cd diffutils-3.0
+git checkout v3.0
+
+Then I removed everything else saving the contents of src and moving them into diffutils-3.0.
+
+Copy source code of modified Diffutils 3.0 to diffutils-3.0-patch:
+cd diffutils
+cp src/*.c ../diffutils-3.0-patch/
+
+Executed the following command:
+diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt
+
+15. Then we compare the two text files:
+diff quote-3.0-test.txt quote-3.0-patch.txt
+The files are not identical. However, it is observed that the difference in the two files are trivial - mainly ` and '. The differences are indeed innocuous.

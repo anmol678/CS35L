@@ -1,0 +1,41 @@
+Comparison between sfrob and sfrobu:
+lines		comparisons
+10		34
+100		4852
+1000		23291		
+10000		5664294
+100000		62519357
+
+this suggests that to estimate the number of comparisons as a function of the number of lines we can use nlogn.
+
+Comparing the overall performance of sfrob, sfrobu, sfrobs, sfrobu -f, and sfrobs -f:
+
+time ./sfrob < test.txt
+real	0m0.002s
+user	0m0.000s
+sys	0m0.001s
+
+time ./sfrobu < test.txt 
+real	0m0.002s
+user	0m0.000s
+sys	0m0.002s
+
+time ./sfrobs < test.txt 
+real	0m0.006s
+user	0m0.002s
+sys	0m0.004s
+
+time ./sfrobu -f < test.txt 
+real	0m0.002s
+user	0m0.001s
+sys	0m0.002s
+
+time ./sfrobs -f < test.txt 
+real	0m0.008s
+user	0m0.002s
+sys	0m0.005s
+
+sfrob comes out to be the fastest as less system calls are made in comparison to sfrobu. We have already seen the results of similar comparisons made in the lab part of this assignment. sfrobu does 
+not make use of buffers and literally reads one byte at a time from the file requiring more system calls and making execution slower.
+
+The shell script sfrobs is the slowest of them all as suggested by the real time. This implies that the multiple pipings take longer to execute than sfrob and sfrobu.

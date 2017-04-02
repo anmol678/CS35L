@@ -1,0 +1,132 @@
+Once we are logged onto the SEASnet server we check if the locale is correctly 
+configured using command locale. It is set to 'en-US', so we reconfigure it to 
+'C' using command export LC_ALL='C'. We execute command locale again to make 
+sure that locale is now configured as desired.
+
+We then redirect the sorted contents of the file located at 
+usr/share/dict/words into a new file called words using command
+sort usr/share/dict/words > words.
+
+Next we use the command
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/assign2.html
+to get the contents of the assignment page as a html file. We convert this to 
+a text file using mv assign2.html assign2.txt.
+
+We begin by running the first command tr -c 'A-Za-z' '[\n*]' < assign2.txt 
+which gives us an output with every word in the file separated by a number of 
+new lines. This happens because the tr command takes the complement of the 
+first set with option -c. This set comprises all characters excluding uppercase 
+and lowercase letters a to z and replaces these non-letter characters by a new 
+line character. In this situation, not all words have equal number of new lines 
+between them as some words maybe succeeded by more than non-letter character.
+
+We run the second command given to us tr -cs 'A-Za-z' '[\n*]' < assign2.txt 
+with assign2.txt file as standard input. The output displays every word in the 
+file in a new line. Meaning that each word is separated from another word by 
+one new line character. This happens because the command uses the option -cs 
+which is a combination of the complement and the squeeze options. The squeeze 
+options eliminates more than one instance of the new line character leaving 
+only one \n.
+
+The third command is run in the following manner:
+tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort.
+< assign2.txt is added because the tr command needs an input before it is piped
+to the sort command. This command gives us an output which is essentially a
+sorted version of the previous output. All words are separated by a new line,
+however, they are sorted alphabetically.
+
+The next command is tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u. The option 
+-u which stands for unique discards more than one instance of a word. Hence, 
+this output is equivalent to the previous output without repeating any words.
+ 
+We run the fifth command: 
+tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u | comm - words.
+The comm command compares the sorted output of unique words from the file 
+assign2.txt and the file words which has all the words from the dictionary 
+stored in it. We get an output with three columns - the first column lists 
+everything unique to the first file, the second column lists everything unique 
+to the second file and the third column lists everything that is common to the 
+two files. Naturally, the second column is the longest since it contains a list 
+of all the words in file words not present in assign2.txt.
+
+The final command 
+tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u | comm -23 - words
+suppresses the second and the third columns displaying only the contents of the
+first column (which is a list of words unique to assign2.txt). The option -23 
+performs this suppression.
+
+Now we start working on the spell checker for Hawaiian:
+First we extract the English to Hawaiian word table using wget 
+http://mauimapp.com/moolelo/hwnwdseng.htm. Then we create a file buildwords in 
+our working directory using touch buildwords. We start writing the script:
+#!/bin/sh
+
+#separate lines with <td>Eword</td> and <td>Hword</td>
+grep '<td>.*</td>'
+
+#remove all lines without words
+grep -v '<td></td>' 
+
+#remove every other line to eliminate English words
+sed -n 'g;n;p'
+
+#remove all tags to obtain only the words between them
+sed 's/\<[^.]*>//g'
+
+#convert all uppercase letters to lowercase
+tr '[:upper:]' '[:lower:]'
+
+#remove all blank spaces from the beginning of each line
+sed 's/^ *//g'
+
+#translate all ` to '
+tr '`' \'
+
+#entries separated by a , or a space are treated as multiple words
+sed 's/, /\n\g;s/ /\n\g'
+
+#all entries with non-Hawaiian letters are deleted
+sed '/[^pkmnwlhaeiou'\'' ]/d'
+
+#the Hawaiian entire are sorted and any duplicates removed
+sort -u
+
+the script is complete!
+The permissions for the file buildwords that contains the script are modified 
+to make it executable by using command chmod +x buildwords. Then we create the 
+Hawaiian dictiory by taking the HTML file as the standard input, running the 
+script and storing its output in a file called hwords. Command to do this is as 
+follows: cat hwnwdseng.htm | ./buildwords > hwords
+
+We then go on to modify the last shell command to check the spelling of 
+assign2.txt in Hawaiian by referring to hwords using the following command: tr 
+'[:upper:]' '[:lower:]' < assign2.txt | tr -cs 'a-z' '[\n*]'| sort -u | comm 
+-23 - hwords
+ 
+We run wget http://mauimapp.com/moolelo/hwnwdseng.htm to save the webpage. Then 
+we run our English and Hawaiian spell checkers to obtain the following results:
+Words misspelled in English:
+tr '[:upper:]' '[:lower:]' | tr -cs 'a-z' '[\n*]' < assign2.html | sort -u | 
+comm -23 - words | wc -l
+There are 38 misspelled words in English. wc -l counts the number of lines 
+which includes a blank line. Hence, ignoring that line we get 38 words.
+However, if I do not convert uppercase letters to lowercase and use the 
+following command:
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words | wc -l
+We get 88 words that do not match with the English dictionary file words. On 
+inspecting this result we notice that some valid English words with uppercase 
+letters were not in fact present in the words file. Hence, giving us an 
+inaccurate result.   
+Words misspelled in Hawaiian:
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' | 
+sort -u | comm -23 - hwords | wc -l
+There are 196 misspelled words in Hawaiian
+Words misspelled as English but not as Hawaiian:
+tr -cs 'A-za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words | comm -12 
+- hwords | wc -l
+Examples: halau, lau, wiki
+Words misspelled as Hawaiian but not as English:
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' | 
+sort -u | comm -23 - hwords | comm -12 - words | wc -l
+There are 108 words misspelled as Hawaiian but not as English.
+Examples: a, hawaiian, kin, link, name, pled, who, etc.

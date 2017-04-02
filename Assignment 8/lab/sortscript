@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cat out.txt | 
+grep -v "^ldd" | 
+sed 's/[\(\)].*//' | 
+sort -u | 
+grep -v "not a dynamic executable" > sort.txt

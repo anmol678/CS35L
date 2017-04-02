@@ -1,0 +1,93 @@
+Once we are logged onto the SEASNet server, we use the following command to download a version of coreutils: 
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/coreutils-with-bug.tar.gz
+
+As before, we untar the directory by using tar -zxvf coreutils-with-bug.tar.gz
+
+In order to build coreutils we execute the following commands:
+	./configure
+	make
+
+We get the following error:
+
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+
+Next we download the renaming patch using: 
+wget http://web.cs.ucla.edu/classes/winter17/cs35L/assign/coreutils.diff
+
+Now we go on to patch coreutils and build it again using the following commands:
+	patch -p0 < coreutils.diff
+The following files get patched:
+	patching file lib/utimens.c
+	patching file lib/utimens.h
+	patching file src/copy.c
+	patching file src/tee.c
+	patching file src/touch.c
+
+We execute make and this time we do not get any errors since the renaming patch has been applied.
+
+We begin to reproduce the problem and debug following the example provided on the assignment page:
+
+We make a temporary directory using tmp=$(mktemp -d)
+and navigate into it using cd $tmp
+then we create three files to conduct our tests using commands:
+	touch -d '1918-11-11 11:00 GMT' wwi-armistice
+	touch now
+	sleep 1
+	touch now1
+
+and then we call on the buggy ls in the coreutils directory:
+~/Assignment\ 4/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now now1
+
+this gives us the following output:
+-rw-r--r-- 1 classaja class 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 classaja class 0 2017-02-10 15:10:50.366019726 -0800 now1
+-rw-r--r-- 1 classaja class 0 2017-02-10 15:10:41.739788603 -0800 now
+
+as we can see wwi-armistice is displayed first in the list which is opposite of what we desire. The problem has been successfully reproduced.
+
+Now we employ GDB to debug ls:
+gdb --args ~/Assignment\ 4/coreutils-with-bug/src/ls -lt wwi-armistice now now1
+
+Once in GDB we execute (gdb) info functions which provides a list of functions. We see a number of functions related to comparing times, however we do not know which is the one relevant to our issue. 
+So we set a breakpoint at function sort_files() and continue to debug:
+	(gdb) run
+we step into the function
+	(gdb) s
+and inspect the code where the function breaks
+	(gdb) list
+	(gdb) list
+	(gdb) list
+this displays the contents of the function sort_files(). We notice something of interest here. The function compare_mtime definitely has something to do with comparing times. We set another 
+breakpoint:
+	(gdb) break compare_mtime
+the we step into the function using
+	(gdb) si
+which gives us the following output:
+timespec_cmp (b=..., a=...) at ../lib/timespec.h:49
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+	(gdb)list
+outputs to show details of timespec_cmp:
+46	timespec_cmp (struct timespec a, struct timespec b)
+47	{
+48	  int diff = a.tv_sec - b.tv_sec;
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+50	}
+
+We instantly spot that the problem lies in line 48: a.tv_sec - b.tv_sec. If a.tv_sec is really small diff will be a very large negative value which will wrap around hindering accurate comparison.   
+
+We build our patch file and implement it to a new coreutils. 
+
+The file system used on SEASnet server and the tmp directory varies - SEASNet employs a 64 bit one where tmp uses a 32 bit. So when we recreate the bug locally we get the flowing output:
+-rw-r--r-- 1 classaja class 0 Dec 17  2054 wwi-armistice
+-rw-r--r-- 1 classaja class 0 Feb  9 10:51 now1
+-rw-r--r-- 1 classaja class 0 Feb  9 10:51 now
+
+We see a future date which should not be happening. This occurs because the Unix Epoch counts seconds since 1970. This causes problems when Unix Epoch is added to the 64 bit displaying a future date.

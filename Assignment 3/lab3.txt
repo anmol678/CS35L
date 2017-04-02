@@ -1,0 +1,133 @@
+We log onto the SEASNet server and create a new directory on the Desktop for 
+this lab.
+
+1. We use the command wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz 
+to grab Coreutils 7.6. 
+
+2. We notice that the file is archived, hence we first need to ’untar’ it. 
+This is done by using the command tar -xzvf coreutils-7.6.tar.gz We then enter 
+the coreutils-7.6 directory cd coreutils-7.6 and skim through INSTALL file for 
+instructions. We then create a new directory test in the parent directory to 
+compile and install the package: cd .. then mkdir test. Then we navigate back 
+into coreutils-7.6 and as per instructions run the following commands: 
+i) ./configure --prefix="/u/eng/class/classaja/Desktop/Assignment\ 3/test"
+ii) make
+iii) make install
+
+3. locale is already set to en_US.UTF-8. We go on to inspect if the bug exists 
+(while in test) by using the following commands: ls -l /bin/bash 
+-rwxr-xr-x 1 root root 960616 2016-10-17 03:05 /bin/bash
+We instantly  notice the buggy format in which the date is displayed.
+
+4. In order to fix this bug we begin to implement Brady’s patch. For this we 
+navigate to the src directory in coreutils-7.6 and begin editing ls.c using 
+emacs ls.c. We modify the file in emacs manually by referring to Brady’s 
+patch file provided to us.
+
+5. We execute make in coreutils-7.6 and see the following output:
+
+make  all-recursive
+make[1]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6'
+Making all in lib
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+make  all-recursive
+make[3]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+make[4]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+make[4]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+make[3]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/lib'
+Making all in src
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/src'
+make  all-am
+make[3]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/src'
+  CC     ls.o
+  CCLD   dir
+  CCLD   vdir
+  CCLD   ls
+make[3]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/src'
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/src'
+Making all in doc
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/doc'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/doc'
+Making all in man
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/man'
+  GEN    dir.1
+  GEN    vdir.1
+  GEN    ls.1
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/man'
+Making all in po
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/po'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/po'
+Making all in tests
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/tests'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/tests'
+Making all in gnulib-tests
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make  all-recursive
+make[3]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make[4]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make[4]: Nothing to be done for `all-am'.
+make[4]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make[3]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6/gnulib-tests'
+make[2]: Entering directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6'
+make[2]: Nothing to be done for `all-am'.
+make[2]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6'
+make[1]: Leaving directory `/w/home.17/class/classaja/Desktop/Assignment 
+3/coreutils-7.6'
+
+We notice that there is a lot of entering and leaving directories. The number 
+of files being compiled here is much less than before since only ls.c was 
+modified. the first line of output make all-recursive goes through all 
+directories in coreutils-7.6 to check if they have been modified due to the 
+patch. In the end only two directories were re-compiled src and man. And the 
+rest of the commands displayed indicate that all directories were checked 
+however only two were actually compiled again.
+
+6. We check if the bug has been fixed by running the ls command in the two 
+different directories that have the new and old coreutils-7.6 installed. 
+ 
+i) ./test/bin/ls -l ./coreutils-7.6.tar.gz 
+-rw-r--r-- 1 classaja class 10013204 2017-01-27 16:23 ./coreutils-7.6.tar.gz
+
+ii) ./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz
+-rw-r--r-- 1 classaja class 10013204 Jan 27 16:23 ./coreutils-7.6.tar.gz
+
+Now we make the coreutils file more than 1 year old: 
+touch -t 1601231234 coreutils-7.6.tar.gz
+
+As done before, we test using (i) and (ii) as above. And we get the following 
+outputs respectively:
+ i) -rw-r--r-- 1 classaja class 10013204 2016-01-23 12:34 ./coreutils-7.6.tar.gz
+ii) -rw-r--r-- 1 classaja class 10013204 Jan 23 2016 ./coreutils-7.6.tar.gz
+this is the desired format.

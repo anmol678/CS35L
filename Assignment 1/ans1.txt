@@ -1,0 +1,79 @@
+1. man man and check under description and example headers:
+   man -k “keyword”
+2. which cp and which wc were used
+  /usr/local/cs/bin/cp
+  /usr/local/cs/bin/wc
+3. find /usr/bin ?
+   [ - No effect; the command does nothing beyond expanding arguments and performing any specified redirections. A zero exit code is returned.
+   w - Show who is logged on and what they are doing.
+   X - network-transparent window system.
+4. cd /usr/bin navigate to directory where emcas is stored
+   ls -l "emacs" displays the symbolic link linking to the file /etc/alternatives/emacs.
+5. man chmod  under description header:
+   g+s - allow all users in the group to set group ID on execution
+   o-x - remove permission to execute for others (users not in the file's group)
+6. man find  under tests header:
+   find -mtime -21
+7. find -mtime -21
+   .
+   ./.login
+   ./.logout
+   ./.cshrc
+   ./.profile
+   ./.bash_logout
+   ./nsdefault
+   ./Desktop
+   ./Desktop/test.txt
+   ./Documents
+   ./Downloads
+   ./.cache
+   ./.cache/abrt
+   ./.cache/abrt/lastnotification
+   ./.config
+   ./.config/abrt
+   ./.viminfo
+   ./.bash_history
+   ./.emacs.d
+   ./.emacs.d/auto-save-list
+8. which find  returns /usr/bin
+   cd /usr/bin  navigating to the directory of find
+   find -type l -wc  returns 247 implying 247 symbolic links
+9. man ls  -lt returns a listing with dat modified
+   ls -lt  the last file in the list was jvm-common
+10. LC_* environment variables
+11. In emacs:
+    C-h a sort  returns:
+    Buffer-menu-sort              M-x ... RET
+    Sort Tabulated List entries by the column at point.
+    sort-columns                  M-x ... RET
+    Sort lines in region alphabetically by a certain range of columns.
+    sort-fields                   M-x ... RET
+    Sort lines in region lexicographically by the ARGth field of each line.
+    sort-lines                    M-x ... RET
+    Sort lines in region alphabetically; argument means descending order.
+    sort-numeric-fields           M-x ... RET
+    Sort lines in region numerically by the ARGth field of each line.
+    sort-pages                    M-x ... RET
+    Sort pages in region alphabetically; argument means descending order.
+    sort-paragraphs               M-x ... RET
+    Sort paragraphs in region alphabetically; argument means descending order.
+    sort-regexp-fields            M-x ... RET
+    Sort the text in the region region lexicographically.
+    tabulated-list-col-sort       M-x ... RET
+    Sort Tabulated List entries by the column of the mouse click E.
+    tabulated-list-sort           M-x ... RET
+    Sort Tabulated List entries by the column at point.
+12. C-M-a - Move to the beginning of the current defun. 
+    C-M-b - Moves backward over the next sexp.
+    C-M-c - Exit from the innermost recursive edit or minibuffer.
+    C-M-d - Move down one level of parens.
+    C-M-e - Move to the end of the current defun.
+    C-M-f - Moves forward over the next sexp.
+    C-M-g - Undefined
+    C-M-h - Sets the region around the current defun.
+13. C-g aborts a command in progress.
+14. Yanking means to reinsert previously killed text. yank is bound to C-y.
+15. emacs
+    C-x d  dired command in emacs shows the total available memory
+    cd /usr/bin
+    ls -l  this command shows the total memory used however, omits the total available memory

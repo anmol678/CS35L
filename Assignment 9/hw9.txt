@@ -1,0 +1,32 @@
+2. We checkout version 3.0 of Diffutils into a new branch called quote:
+git checkout v3.0 -b quote
+
+3. We run the patch command to patch -p1 < ../quote-3.0-patch.txt to patch the newly created branch quote and get the following output:
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+4 & 5. To create a ChangeLog we follow the following steps:
+emacs src/cmp.c
+C-x 4 a
+This adds the file to the ChangeLog as an entry. Then we add a description "Changed all occurrences of ` to '. No other changes made to the sourcecode."
+We do this for all of the sex file mentioned above.
+
+6. We stage all files that were patched and proceed to commit using the ChangeLog entry as the commit message:
+git add .
+git commit -aF ChangeLog
+
+7. Next we create a patch file for our latest commit using:
+git format-patch -1 --stdout > formatted-patch.txt
+
+8. We checkout version 3.0 of Diffutils into a new branch again. This time naming it partner:
+git checkout v3.0 -b partner
+Me and my partner Daniel exchanged patches andI verified his patch. I did this using scp daniil@lnxsrv.seas.ucla.edu:~/CS35L/Assignment9/formatted-patch.txt .
+Then I applied the patch using git am formatted-patch.txt. After this I executed make check to check that the system works. Thus his patch worked.
+
+9. We execute command make distdir as instructed and this created a new directory diffutils-3.0.1-1049. We inspect ChangeLog inside this directory and it is indeed the same as we created a few steps earlier.
+
+10. First we change directory using: cd ~eggert/src/gnu/emacs. Then we execute gitk. A gitk window popped open. It would have been extremely hard to scroll down to commits dating 2015-01-25. So we quite gitk and execute another command to limit our results till the mentioned date: gitk --until=2015-01-25. This restricted the search to actions performed until 2015-01-25. Then it was easy to find the latest merge.

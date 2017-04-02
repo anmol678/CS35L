@@ -1,0 +1,39 @@
+After logging onto the SEASNet server, we check for the version of sort using command sort --version. The version as desired is 8.26
+
+We are first required to generate a file containing 10,000,000 random single-precision floating point numbers, each on a new line without any white spaces. We use the following command 
+od -tf -N 40000000 which uses option f for floating point numbers and 
+-N 40000000(bytes) to signify 10,000,000 numbers of 4 bytes each. We are required to process this output. First we remove the octal address at the beginning of each line 
+using sed 's/^[0-7]* *//g’. We also need to take care of any white spaces by replacing them by newline characters. This can be done using tr -s ' ' '\n'. We pipe these 
+commands together to obtain the desired output into a file as follows:
+od -tf -N 40000000 < /dev/urandom | sed 's/^[0-7]* *//g’ | tr -s ' ' '\n' > output
+
+We begin checking the performance of sort using the time command as specified:
+
+1) time -p sort -g output > /dev/null
+real 17.96
+user 96.31
+sys 0.32
+
+2) time -p sort -g --parallel=1 output > /dev/null
+real 93.80
+user 93.67
+sys 0.12
+
+3) time -p sort -g --parallel=2 output > /dev/null
+real 49.37
+user 94.30
+sys 0.14
+
+4) time -p sort -g --parallel=4 output > /dev/null
+real 28.13
+user 94.81
+sys 0.37
+
+5) time -p sort -g --parallel=8 output > /dev/null
+real 17.78
+user 95.68
+sys 0.32
+
+It is evident that the user and system times increase with the number of threads. Implying that the greater the number of threads the more system calls issued. However, at the same time we see a 
+decrease in real time. Another interesting observation that can be made here is that sort without parallel option and sort with parallel=8 have similar execution  times. This may lead us to believe 
+that sort by default is multithreaded to run in 8 threads.

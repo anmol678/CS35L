@@ -1,0 +1,56 @@
+#!/bin/sh
+
+DIR=$1
+FILE=`find $DIR -maxdepth 1 -type f | sort`
+declare -a AR
+count=0
+declare -A LIST
+index1=0
+declare -a index2
+declare -a TEMP
+tcount=0
+
+for f in $FILE
+do
+	if [ ! -r "$f" ]
+	then
+	    echo "Error reading file"
+   	else
+	    AR[$count]=$f
+	    count=$count+1
+	fi
+done
+
+while [ $count != 0 ]
+do
+	index2[$index1]=0
+	LIST[$index1,${index2[$index1]}]=${AR[0]}
+	index2[$index1]=1
+	for (( j=1; j<$count; j++ ))
+	do
+		cmp -s ${AR[0]} ${AR[$j]} > /dev/null
+		if [ ! $? -eq 1 ]
+		then
+			LIST[$index1,${index2[$index1]}]=${AR[$j]}
+			index2[$index1]=`expr ${index2[$index1]} + 1`
+		else
+			TEMP[$tcount]=${AR[$j]}
+			tcount=$tcount+1
+		fi
+	done
+	unset AR
+	AR=("${TEMP[@]}")
+	count=$tcount
+	unset TEMP
+	tcount=0
+	index1=`expr $index1 + 1`
+done
+
+for (( i=0; i<$index1; i++))
+do
+	for (( j=1; j<${index2[$i]}; j++))
+	do
+		ln -f -- "${LIST[$i,0]}" "${LIST[$i,$j]}"
+	done
+done
+

@@ -1,0 +1,41 @@
+
+Q1. Brady’s patch removed "case_long_iso_time_style:" because it was a label 
+inside a switch-case block that was associated with a goto statement. It was 
+not necessary to delete this line as the goto statement that was linked to this 
+label was deleted. However, it can be considered an attempt to avoid 
+redundancies in the code. 
+
+Q2. The patched version of Coreutils can cause problems if the company has 
+international transactions. People in different regions,  specially where 
+english is not the native language, may have comprehend the date incorrectly. 
+Also, certain applications or programs programmed to work with a specific date 
+format, may produce erratic results on running with the patched version.
+
+Q3. On executing python randline.py /dev/null we get the following output:
+Traceback (most recent call last):
+  File "randline.py", line 70, in <module>
+    main()
+  File "randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  # raises IndexError if seq is 
+empty
+IndexError: list index out of range
+
+This happens because we are passing an empty file (/dev/null) as an argument to 
+the script. However, the script doesn’t know that the file is empty. It 
+assumes that there is something in the file and attempts to access the elements 
+in the file. Since there are 0 lines the index is essentially out of range. 
+Also, as stated in the comment in line 274, IndexError occurs if seq is empty 
+which is exactly the case here.
+
+Q4. On executing python3 randline.py /dev/null we get the following output:
+  File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+
+Note that we get a syntax error here. This is because python2 came equipped 
+with automatic tuple unpacking however, python3 deprecated this functionality.

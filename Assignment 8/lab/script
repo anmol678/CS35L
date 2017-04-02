@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /usr/bin
+
+while read line
+do
+	echo $'\n'"ldd $line" >>~/Assignment\ 8/out1.txt
+	ldd $line >> ~/Assignment\ 8/out1.txt
+done

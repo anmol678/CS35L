@@ -1,0 +1,40 @@
+We begin with booting Ubuntu using the CD provided to us.
+
+Then we install relevant OpenSSH files using the following commands:
+sudo apt-get install openssh-server
+sudo apt-get install openssh-client
+
+Once this is done, we begin to setup our server. First we generate keys using: 
+ssh-keygen
+
+I didn’t change the default location and didn’t enter any passkey for it.
+Then I added my teammate Jason as a user using the following commands:
+sudo user add -d /home/jason/ -m jason
+sudo passwd jason
+A new directory for user Jason was created with password jason.
+
+Now we need to create an ssh directory in Jason’s folder and give him ownership so that he is able to log onto server. 
+cd /home/jason
+sudo mkdir .ssh
+sudo chown -R jason ..sh
+sudo chmod 700 .ssh
+
+Next we find the IP address using:
+ifconfig
+My IP address was 172.30.118.41
+
+Jason performed the same steps and added me as a user on his server. His IP address was 172.27.64.161.
+
+Now that everything was setup, all we had to do was act as clients for each other’s servers. We used the following commands:
+ssh-copy-id -i anmol@172.27.64.161
+ssh-add
+This added my public key to the shh folder on the server. 
+
+Everything worked okay till this point. I proceeded to log onto Jason’s server:
+ssh -X anmol@172.27.64.161
+
+Then I tested using xterm:
+xterm
+This opened an xterm shell window. 
+
+Jason followed the same steps and we were able to see each other’s activities on our servers. 

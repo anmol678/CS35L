@@ -1,0 +1,12 @@
+1. The resulting network will still remain secure. Other teams might be able to observe the bytes going across however, they cannot decrypt the messages as 
+they don’t have access to our private key. 
+It is impossible for them to find out the private key just by monitoring bytes going hence and forth.
+(1) If the other teams tap our keyboard, they will be able to record our keystrokes. However, they still cannot gain access to our private key since it is stored on the physical system. They can find 
+out our passphrase thought this but our private key will remain safe.
+(2) In this scenario, since the system files are likely to be on the USB security will be compromised. The other teams will be able to gain access to the private key, if they got hold of the USB and 
+in turn decrypt the bytes being going across our host.
+
+2. gpg --verify simply compares the detached signature to the target file specified. However, if someone intercepts this data he can change the contents and then replace the public key initially 
+provided (by me in this case) and create a new detached signature using the modified data. The gpg --verify command has nothing to do with the author of the file. It would be useful if we could keep 
+track of the author of the file being transmitted by some means. Another option would be to make my public key available to the receiver through some other medium so that he can verify that with the 
+public key in the file he received.

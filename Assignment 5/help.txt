@@ -1,0 +1,57 @@
+1. tr2b
+use getchar
+use putchar
+- 2 arguments
+- from, to
+- len(from) = len(to)
+- translated from char to char
+- from->to have to be of same the lengths
+
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char** argv){
+	//the first argument is the name of the program
+	//the rest of the arguments refer to the parameters
+	//argv[0] is the program name
+	//argv[1] is the from string
+	//argv[2] is the to string
+
+	if (argc < 3)
+	//print error 
+	//exit
+	
+	char *from = argv[1];
+	char *to = argv[2];
+
+	if (strlen(from) != strlen(to))
+	//print error
+	//exit
+	
+	//compare the two strings from and to character by character
+	//trb2 qwe asd <- is the input, in this case every q should be translated to a, every w is translated to s, every e is translated to d and rest all of the characters remain the same (it is case sensitive)
+	//every character in from should be unique
+	for (int i = 0; i < strlen(from) - 1; i++)
+		for (int j = i + 1; i < strlen(from); j++)
+			if (from[i] == from[j])
+			//report error
+	
+	//read characters from stdin
+	//Ctrl-D = EOF
+	//need to set getchar to int variable type because EOF is not included in the 256 set list of characters and EOF is set to a constant only accessible by a integer
+	int character = getchar();
+	
+	while (character != EOF) {
+	//if character is in from string then translate 
+	//if character is not in from string then do nothing
+	//use putchar() to stdout to terminal
+	//continue reading characters
+	}
+}
+
+STRACE
+to generate file of a given size:
+dd if=/dev/urandom of=file.text bs=5120 count=1000
+
+strace:
+strace -o b1.txt ./tr2b from to < file.txt
